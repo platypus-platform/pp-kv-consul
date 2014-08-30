@@ -56,11 +56,11 @@ func (c *Client) Get(query string) (interface{}, error) {
 }
 
 func (c *Client) DeleteTree(query string) error {
-	_, err := c.kv.DeleteTree("nodes/testhost", nil)
+	_, err := c.kv.DeleteTree(query, nil)
 	return err
 }
 
-func (c *Client) Put(key string, value map[string]string) error {
+func (c *Client) Put(key string, value interface{}) error {
 	body, _ := json.Marshal(value)
 
 	node := &consulapi.KVPair{
