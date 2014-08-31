@@ -2,6 +2,7 @@ package ppkv
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/armon/consul-api" // TODO: Lock to branch
 	"path"
 )
@@ -42,17 +43,22 @@ func (c *Client) List(query string) (map[string]interface{}, error) {
 	return ret, nil
 }
 
-func (c *Client) Get(query string) (interface{}, error) {
+func (c *Client) Get(query string, ret interface{}) error {
 	data, _, err := c.kv.Get(query, nil)
-	if err == nil && data != nil {
-		var ret interface{}
-		jsonErr := json.Unmarshal(data.Value, &ret)
-		if jsonErr != nil {
-			return nil, err
-		}
-		return ret, nil
+
+	if err != nil {
+		return err
 	}
-	return nil, err
+
+	if data == nil {
+		return errors.New("key not present")
+	}
+
+	if err := json.Unmarshal(data.Value, &ret); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) DeleteTree(query string) error {
